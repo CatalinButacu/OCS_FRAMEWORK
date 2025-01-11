@@ -1,0 +1,8 @@
+# Ignore the virtual environment folder
+venv/
+
+# Ignore files created by pip install -e .
+*.egg-info/
+
+# Ignore compiled files (__pycache__)
+*.pyc
