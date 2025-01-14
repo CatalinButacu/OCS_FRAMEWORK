@@ -13,7 +13,13 @@ class RGA4:
         :param pm: Mutation probability.
         :param max_nfe: Maximum number of function evaluations (NFE).
         """
-        pass
+        self.func = func
+        self.bounds = bounds
+        self.population_size = population_size
+        self.pc = pc
+        self.pm = pm
+        self.max_nfe = max_nfe
+        self.nfe = 0
 
     def initialize_population(self):
         """
@@ -21,7 +27,11 @@ class RGA4:
 
         :return: A numpy array of shape (population_size, dimension).
         """
-        pass
+        population = []
+        for _ in range(self.population_size):
+            individual = [np.random.uniform(b[0], b[1]) for b in self.bounds]
+            population.append(individual)
+        return np.array(population)
 
     def evaluate_population(self, population):
         """
@@ -30,7 +40,9 @@ class RGA4:
         :param population: A numpy array of shape (population_size, dimension).
         :return: A numpy array of fitness values.
         """
-        pass
+        fitness_values = np.array([self.func(individual) for individual in population])
+        self.nfe += len(population)
+        return fitness_values
 
     def selection(self, population, fitness_values):
         """
@@ -40,7 +52,13 @@ class RGA4:
         :param fitness_values: A numpy array of fitness values.
         :return: Selected parents.
         """
-        pass
+        # Normalize fitness values (minimization problem)
+        fitness_values = 1 / (1 + fitness_values)
+        probabilities = fitness_values / np.sum(fitness_values)
+
+        # Select parents
+        parent_indices = np.random.choice(np.arange(self.population_size), size=self.population_size, p=probabilities)
+        return population[parent_indices]
 
     def blx_alpha_crossover(self, parent1, parent2, alpha=0.1):
         """
@@ -51,7 +69,17 @@ class RGA4:
         :param alpha: BLX-α parameter.
         :return: Two offspring.
         """
-        pass
+        if np.random.rand() < self.pc:
+            child1 = np.zeros_like(parent1)
+            child2 = np.zeros_like(parent2)
+            for i in range(len(parent1)):
+                cmin = min(parent1[i], parent2[i]) - alpha * abs(parent1[i] - parent2[i])
+                cmax = max(parent1[i], parent2[i]) + alpha * abs(parent1[i] - parent2[i])
+                child1[i] = np.random.uniform(cmin, cmax)
+                child2[i] = np.random.uniform(cmin, cmax)
+            return child1, child2
+        else:
+            return parent1.copy(), parent2.copy()
 
     def gaussian_mutation(self, individual):
         """
@@ -60,7 +88,11 @@ class RGA4:
         :param individual: An individual in the population.
         :return: Mutated individual.
         """
-        pass
+        for i in range(len(self.bounds)):
+            if np.random.rand() < self.pm:
+                individual[i] += np.random.normal(0, 1)
+                individual[i] = np.clip(individual[i], self.bounds[i][0], self.bounds[i][1])
+        return individual
 
     def optimize(self):
         """
@@ -68,4 +100,38 @@ class RGA4:
 
         :return: The best solution found and its fitness value.
         """
-        pass
+        # Initialize population
+        population = self.initialize_population()
+        fitness_values = self.evaluate_population(population)
+
+        best_solution = population[np.argmin(fitness_values)]
+        best_fitness = np.min(fitness_values)
+
+        while self.nfe < self.max_nfe:
+            # Selection
+            parents = self.selection(population, fitness_values)
+
+            # Crossover and mutation
+            new_population = []
+            for i in range(0, self.population_size, 2):
+                parent1, parent2 = parents[i], parents[i + 1]
+                child1, child2 = self.blx_alpha_crossover(parent1, parent2)
+                child1 = self.gaussian_mutation(child1)
+                child2 = self.gaussian_mutation(child2)
+                new_population.extend([child1, child2])
+
+            # Evaluate new population
+            new_population = np.array(new_population)
+            new_fitness_values = self.evaluate_population(new_population)
+
+            # Update best solution
+            min_fitness_idx = np.argmin(new_fitness_values)
+            if new_fitness_values[min_fitness_idx] < best_fitness:
+                best_solution = new_population[min_fitness_idx]
+                best_fitness = new_fitness_values[min_fitness_idx]
+
+            # Replace population
+            population = new_population
+            fitness_values = new_fitness_values
+
+        return best_solution, best_fitness

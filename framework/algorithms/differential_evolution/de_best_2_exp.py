@@ -13,7 +13,13 @@ class DEBest2Exp:
         :param CR: Crossover probability.
         :param max_nfe: Maximum number of function evaluations (NFE).
         """
-        pass
+        self.func = func
+        self.bounds = bounds
+        self.population_size = population_size
+        self.F = F
+        self.CR = CR
+        self.max_nfe = max_nfe
+        self.nfe = 0
 
     def initialize_population(self):
         """
@@ -21,7 +27,11 @@ class DEBest2Exp:
 
         :return: A numpy array of shape (population_size, dimension).
         """
-        pass
+        population = []
+        for _ in range(self.population_size):
+            individual = [np.random.uniform(b[0], b[1]) for b in self.bounds]
+            population.append(individual)
+        return np.array(population)
 
     def evaluate_population(self, population):
         """
@@ -30,7 +40,9 @@ class DEBest2Exp:
         :param population: A numpy array of shape (population_size, dimension).
         :return: A numpy array of fitness values.
         """
-        pass
+        fitness_values = np.array([self.func(individual) for individual in population])
+        self.nfe += len(population)
+        return fitness_values
 
     def best_2_mutation(self, population, best_idx):
         """
@@ -40,7 +52,13 @@ class DEBest2Exp:
         :param best_idx: Index of the best individual.
         :return: Mutant vector.
         """
-        pass
+        # Select 4 distinct random indices (excluding best_idx)
+        candidates = [i for i in range(self.population_size) if i != best_idx]
+        r1, r2, r3, r4 = np.random.choice(candidates, size=4, replace=False)
+
+        # Generate mutant vector
+        mutant = population[best_idx] + self.F * (population[r1] - population[r2]) + self.F * (population[r3] - population[r4])
+        return mutant
 
     def exponential_crossover(self, target, mutant):
         """
@@ -50,7 +68,16 @@ class DEBest2Exp:
         :param mutant: Mutant vector.
         :return: Trial vector.
         """
-        pass
+        trial = np.copy(target)
+        n = len(self.bounds)
+        start = np.random.randint(n)
+        L = 0
+
+        while np.random.rand() < self.CR and L < n:
+            trial[(start + L) % n] = mutant[(start + L) % n]
+            L += 1
+
+        return trial
 
     def optimize(self):
         """
@@ -58,4 +85,43 @@ class DEBest2Exp:
 
         :return: The best solution found and its fitness value.
         """
-        pass
+        # Initialize population
+        population = self.initialize_population()
+        fitness_values = self.evaluate_population(population)
+
+        best_idx = np.argmin(fitness_values)
+        best_solution = population[best_idx]
+        best_fitness = fitness_values[best_idx]
+
+        while self.nfe < self.max_nfe:
+            new_population = []
+            for i in range(self.population_size):
+                # Mutation
+                mutant = self.best_2_mutation(population, best_idx)
+
+                # Crossover
+                trial = self.exponential_crossover(population[i], mutant)
+
+                # Clip to bounds
+                trial = np.clip(trial, [b[0] for b in self.bounds], [b[1] for b in self.bounds])
+
+                # Selection
+                trial_fitness = self.func(trial)
+                self.nfe += 1
+
+                if trial_fitness < fitness_values[i]:
+                    new_population.append(trial)
+                    fitness_values[i] = trial_fitness
+                else:
+                    new_population.append(population[i])
+
+                # Update best solution
+                if trial_fitness < best_fitness:
+                    best_solution = trial
+                    best_fitness = trial_fitness
+                    best_idx = i
+
+            # Replace population
+            population = np.array(new_population)
+
+        return best_solution, best_fitness

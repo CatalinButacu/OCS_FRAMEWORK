@@ -14,7 +14,9 @@ class CGAAdaptiveV2(CGA):
         :param pm_initial: Initial mutation probability.
         :param max_nfe: Maximum number of function evaluations (NFE).
         """
-        pass
+        super().__init__(func, bounds, population_size, pc_initial, pm_initial, max_nfe)
+        self.pc_initial = pc_initial
+        self.pm_initial = pm_initial
 
     def adapt_parameters(self, fitness_values):
         """
@@ -22,7 +24,12 @@ class CGAAdaptiveV2(CGA):
 
         :param fitness_values: A numpy array of fitness values.
         """
-        pass
+        avg_fitness = np.mean(fitness_values)
+        best_fitness = np.min(fitness_values)
+
+        # Adapt pc and pm
+        self.pc = self.pc_initial * (1 - (avg_fitness - best_fitness) / avg_fitness)
+        self.pm = self.pm_initial * (1 + (avg_fitness - best_fitness) / avg_fitness)
 
     def optimize(self):
         """
@@ -30,4 +37,43 @@ class CGAAdaptiveV2(CGA):
 
         :return: The best solution found and its fitness value.
         """
-        pass
+        # Initialize population
+        population = self.initialize_population()
+        fitness_values = self.evaluate_population(population)
+
+        best_solution = population[np.argmin(fitness_values)]
+        best_fitness = np.min(fitness_values)
+
+        while self.nfe < self.max_nfe:
+            # Adapt pc and pm
+            self.adapt_parameters(fitness_values)
+
+            # Selection
+            parents = self.selection(population, fitness_values)
+
+            # Crossover and mutation
+            new_population = []
+            for i in range(0, self.population_size, 2):
+                parent1, parent2 = parents[i], parents[i + 1]
+                child1, child2 = self.crossover(parent1, parent2)
+                child1 = self.mutation(child1)
+                child2 = self.mutation(child2)
+                new_population.extend([child1, child2])
+
+            # Evaluate new population
+            new_population = np.array(new_population)
+            new_fitness_values = self.evaluate_population(new_population)
+
+            # Update best solution
+            min_fitness_idx = np.argmin(new_fitness_values)
+            if new_fitness_values[min_fitness_idx] < best_fitness:
+                best_solution = new_population[min_fitness_idx]
+                best_fitness = new_fitness_values[min_fitness_idx]
+
+            # Replace population
+            population = new_population
+            fitness_values = new_fitness_values
+
+        return best_solution, best_fitness
+    
+    
