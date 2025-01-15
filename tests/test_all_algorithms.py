@@ -63,12 +63,17 @@ results_df.to_csv("results/csv/fitness_table/experiment_results.csv", index=Fals
 # --- Step 4: Statistical Analysis ---
 # Compute statistics (min, max, mean, std) for each algorithm on each problem
 summary = results_df.groupby(["Function", "Dimension", "Algorithm"]).agg(
-    Min_Fitness=("Best Fitness", "min"),
-    Max_Fitness=("Best Fitness", "max"),
-    Mean_Fitness=("Best Fitness", "mean"),
-    Std_Fitness=("Best Fitness", "std"),
+    Best=("Best Fitness", "min"),  # Renamed to "Best"
+    Average=("Best Fitness", "mean"),  # Renamed to "Average"
+    Worst=("Best Fitness", "max"),  # Renamed to "Worst"
+    Std=("Best Fitness", "std"),  # Renamed to "Std"
     Mean_Execution_Time=("Execution Time", "mean"),
 ).reset_index()
 
+# Reorder columns to match the table
+summary = summary[["Function", "Dimension", "Algorithm", "Best", "Average", "Worst", "Std", "Mean_Execution_Time"]]
+
 # Save summary to a CSV file
 summary.to_csv("results/csv/fitness_table/experiment_summary.csv", index=False)
+
+print("Experiment summary CSV file updated and saved successfully!")
