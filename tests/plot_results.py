@@ -116,48 +116,99 @@ print(best_algorithms[["Function", "Dimension", "Algorithm", "Mean_Fitness"]])
 def plot_best_performance_evolution_for_function(func_name):
     """
     Plot the evolution of the best fitness over time for each algorithm for a specific function.
-    Only the first 20 iterations are plotted.
+    Only the first 20 iterations are plotted for each dimension.
     Save the plot in a structured folder.
     """
-    plt.figure(figsize=(12, 8))
-    dimIdx = 1  # Use the second dimension (D=10) for best evolution plots
+    for dimIdx, dim in enumerate(dimensions):  # Iterate over all dimensions
+        plt.figure(figsize=(12, 8))  # Create a new figure for each dimension
 
-    for algo_name in algorithms:
-        if algo_name == "RandomSearch":
-            continue  # Skip RandomSearch
+        for algo_name in algorithms:
+            if algo_name == "RandomSearch":
+                continue  # Skip RandomSearch
 
-        # Load convergence data for the specified function and algorithm
-        convergence_file = f"results/csv/convergence/{func_name}_{algo_name}_D{dimensions[dimIdx]}.csv"
-        if not os.path.exists(convergence_file):
-            print(f"No convergence data for {func_name}, {algo_name}, D={dimensions[dimIdx]}")
-            continue
+            # Load convergence data for the specified function and algorithm
+            convergence_file = f"results/csv/convergence/{func_name}_{algo_name}_D{dim}.csv"
+            if not os.path.exists(convergence_file):
+                print(f"No convergence data for {func_name}, {algo_name}, D={dim}")
+                continue
 
-        convergence_df = pd.read_csv(convergence_file)
+            convergence_df = pd.read_csv(convergence_file)
 
-        # Find the best run (the one with the minimum final fitness value)
-        best_run = convergence_df.iloc[-1].idxmin()
-        best_fitness_history = convergence_df[best_run]
+            # Find the best run (the one with the minimum final fitness value)
+            best_run = convergence_df.iloc[-1].idxmin()
+            best_fitness_history = convergence_df[best_run]
 
-        # Slice the best fitness history to only include the first 20 iterations
-        best_fitness_history = best_fitness_history[:20]
+            # Slice the best fitness history to only include the first 20 iterations
+            best_fitness_history = best_fitness_history[:20]
 
-        # Plot the best fitness history for the first 20 iterations
-        plt.plot(best_fitness_history, label=f"{algo_name}")
+            # Plot the best fitness history for the first 20 iterations
+            plt.plot(best_fitness_history, label=f"{algo_name}")
 
-    plt.title(f"Best Fitness Evolution for {func_name} (Dimension {dimensions[dimIdx]}, First 20 Iterations)")
-    plt.xlabel("Iteration")
-    plt.ylabel("Best Fitness")
-    plt.legend()
-    plt.grid()
+        # Add title, labels, and legend for the plot
+        plt.title(f"Best Fitness Evolution for {func_name} (Dimension {dim}, First 20 Iterations)")
+        plt.xlabel("Iteration")
+        plt.ylabel("Best Fitness")
+        plt.legend()
+        plt.grid()
 
-    # Save the plot in a structured folder
-    plot_folder = f"results/images/best_evolution/{func_name}"
-    os.makedirs(plot_folder, exist_ok=True)
-    plot_filename = f"{plot_folder}/best_evolution_D{dimensions[dimIdx]}.png"
-    plt.savefig(plot_filename)
-    plt.close()  # Close the plot to free up memory
-    print(f"Saved best evolution plot: {plot_filename}")
+        # Save the plot in a structured folder
+        plot_folder = f"results/images/best_evolution/{func_name}"
+        os.makedirs(plot_folder, exist_ok=True)
+        plot_filename = f"{plot_folder}/best_evolution_D{dim}.png"
+        plt.savefig(plot_filename)
+        plt.close()  # Close the plot to free up memory
+        print(f"Saved best evolution plot: {plot_filename}")
+
+# --- Step 6: Plot Average Performance Evolution for Each Formula ---
+def plot_average_performance_evolution_for_function(func_name):
+    """
+    Plot the evolution of the average best fitness over time for each algorithm for a specific function.
+    Only the first 20 iterations are plotted for each dimension.
+    Save the plot in a structured folder.
+    """
+    for dimIdx, dim in enumerate(dimensions):  # Iterate over all dimensions
+        plt.figure(figsize=(12, 8))  # Create a new figure for each dimension
+
+        for algo_name in algorithms:
+            if algo_name == "RandomSearch":
+                continue  # Skip RandomSearch
+
+            # Load convergence data for the specified function and algorithm
+            convergence_file = f"results/csv/convergence/{func_name}_{algo_name}_D{dim}.csv"
+            if not os.path.exists(convergence_file):
+                print(f"No convergence data for {func_name}, {algo_name}, D={dim}")
+                continue
+
+            convergence_df = pd.read_csv(convergence_file)
+
+            # Compute the average best fitness across all runs
+            avg_fitness_history = convergence_df.mean(axis=1)
+
+            # Slice the average fitness history to only include the first 20 iterations
+            avg_fitness_history = avg_fitness_history[:20]
+
+            # Plot the average fitness history for the first 20 iterations
+            plt.plot(avg_fitness_history, label=f"{algo_name}")
+
+        # Add title, labels, and legend for the plot
+        plt.title(f"Average Fitness Evolution for {func_name} (Dimension {dim}, First 20 Iterations)")
+        plt.xlabel("Iteration")
+        plt.ylabel("Average Best Fitness")
+        plt.legend()
+        plt.grid()
+
+        # Save the plot in a structured folder
+        plot_folder = f"results/images/average_evolution/{func_name}"
+        os.makedirs(plot_folder, exist_ok=True)
+        plot_filename = f"{plot_folder}/average_evolution_D{dim}.png"
+        plt.savefig(plot_filename)
+        plt.close()  # Close the plot to free up memory
+        print(f"Saved average evolution plot: {plot_filename}")
 
 # Plot best performance evolution for each benchmark function (first 20 iterations)
 for func_name in benchmark_functions:
     plot_best_performance_evolution_for_function(func_name)
+
+# Plot average performance evolution for each benchmark function (first 20 iterations)
+for func_name in benchmark_functions:
+    plot_average_performance_evolution_for_function(func_name)
