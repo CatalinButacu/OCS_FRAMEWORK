@@ -53,10 +53,19 @@ class RGA4:
         :param fitness_values: A numpy array of fitness values.
         :return: Selected parents.
         """
+        # Shift fitness values to make them non-negative
+        min_fitness = np.min(fitness_values)
+        if min_fitness < 0:
+            fitness_values = fitness_values - min_fitness + 1e-10  # Add a small epsilon to avoid zero
+        
         # Normalize fitness values (minimization problem)
         fitness_values = 1 / (1 + fitness_values)
         probabilities = fitness_values / np.sum(fitness_values)
-
+        
+        # Ensure probabilities are valid
+        if np.any(probabilities < 0) or np.any(np.isnan(probabilities)):
+            raise ValueError("Invalid probabilities in selection. Check fitness values.")
+        
         # Select parents
         parent_indices = np.random.choice(np.arange(self.population_size), size=self.population_size, p=probabilities)
         return population[parent_indices]

@@ -6,3 +6,6 @@ venv/
 
 # Ignore compiled files (__pycache__)
 *.pyc
+
+# Ignore result from plots
+results/*
