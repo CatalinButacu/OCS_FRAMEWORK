@@ -20,6 +20,7 @@ class DEBest1Exp:
         self.CR = CR
         self.max_nfe = max_nfe
         self.nfe = 0
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -92,6 +93,7 @@ class DEBest1Exp:
         best_idx = np.argmin(fitness_values)
         best_solution = population[best_idx]
         best_fitness = fitness_values[best_idx]
+        self.best_fitness_history.append(best_fitness)
 
         while self.nfe < self.max_nfe:
             new_population = []
@@ -120,6 +122,9 @@ class DEBest1Exp:
                     best_solution = trial
                     best_fitness = trial_fitness
                     best_idx = i
+                    
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
             # Replace population
             population = np.array(new_population)

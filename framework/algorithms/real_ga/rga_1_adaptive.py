@@ -20,6 +20,7 @@ class RGA1Adaptive:
         self.pm_initial = pm_initial
         self.max_nfe = max_nfe
         self.nfe = 0
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -102,6 +103,7 @@ class RGA1Adaptive:
 
         best_solution = population[np.argmin(fitness_values)]
         best_fitness = np.min(fitness_values)
+        self.best_fitness_history.append(best_fitness)
 
         iteration = 0
         max_iter = self.max_nfe // self.population_size
@@ -132,6 +134,9 @@ class RGA1Adaptive:
             if new_fitness_values[min_fitness_idx] < best_fitness:
                 best_solution = new_population[min_fitness_idx]
                 best_fitness = new_fitness_values[min_fitness_idx]
+
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
             # Replace population
             population = new_population

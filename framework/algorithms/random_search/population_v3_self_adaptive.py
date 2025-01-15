@@ -19,6 +19,7 @@ class PopulationV3SelfAdaptive:
         self.max_iter = max_iter
         self.alpha_initial = alpha_initial
         self.alpha_change_rate = alpha_change_rate
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -42,6 +43,7 @@ class PopulationV3SelfAdaptive:
         population = self.initialize_population()
         best_solution = None
         best_fitness = float('inf')
+        self.best_fitness_history.append(best_fitness)
         alpha = self.alpha_initial
 
         for _ in range(self.max_iter):
@@ -72,5 +74,9 @@ class PopulationV3SelfAdaptive:
             if fitness_values[min_fitness_idx] < best_fitness:
                 best_solution = new_population[min_fitness_idx]
                 best_fitness = fitness_values[min_fitness_idx]
+
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
+
 
         return best_solution, best_fitness

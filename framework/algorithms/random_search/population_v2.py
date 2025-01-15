@@ -17,6 +17,7 @@ class PopulationV2:
         self.population_size = population_size
         self.max_iter = max_iter
         self.alpha = alpha
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -40,6 +41,7 @@ class PopulationV2:
         population = self.initialize_population()
         best_solution = None
         best_fitness = float('inf')
+        self.best_fitness_history.append(best_fitness)
 
         for _ in range(self.max_iter):
             new_population = []
@@ -67,5 +69,8 @@ class PopulationV2:
             if fitness_values[min_fitness_idx] < best_fitness:
                 best_solution = new_population[min_fitness_idx]
                 best_fitness = fitness_values[min_fitness_idx]
+           
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
         return best_solution, best_fitness

@@ -20,6 +20,7 @@ class DERand2Bin:
         self.CR = CR
         self.max_nfe = max_nfe
         self.nfe = 0
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -86,6 +87,7 @@ class DERand2Bin:
 
         best_solution = population[np.argmin(fitness_values)]
         best_fitness = np.min(fitness_values)
+        self.best_fitness_history.append(best_fitness)
 
         while self.nfe < self.max_nfe:
             new_population = []
@@ -113,6 +115,9 @@ class DERand2Bin:
                 if trial_fitness < best_fitness:
                     best_solution = trial
                     best_fitness = trial_fitness
+                    
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
             # Replace population
             population = np.array(new_population)

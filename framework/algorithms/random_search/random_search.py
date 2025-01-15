@@ -13,6 +13,7 @@ class RandomSearch:
         self.func = func
         self.bounds = bounds
         self.max_iter = max_iter
+        self.best_fitness_history = []
 
     def optimize(self):
         """
@@ -22,6 +23,7 @@ class RandomSearch:
         """
         best_solution = None
         best_fitness = float('inf')
+        self.best_fitness_history.append(best_fitness)
 
         for _ in range(self.max_iter):
             # Generate a random solution within bounds
@@ -32,5 +34,8 @@ class RandomSearch:
             if fitness < best_fitness:
                 best_solution = solution
                 best_fitness = fitness
+            
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
         return best_solution, best_fitness

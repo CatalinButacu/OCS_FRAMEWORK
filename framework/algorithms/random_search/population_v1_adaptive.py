@@ -20,6 +20,7 @@ class PopulationV1Adaptive:
         self.max_iter = max_iter
         self.alpha_initial = alpha_initial
         self.alpha_decay = alpha_decay
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -42,6 +43,7 @@ class PopulationV1Adaptive:
         population = self.initialize_population()
         best_solution = None
         best_fitness = float('inf')
+        self.best_fitness_history.append(best_fitness)
 
         for iteration in range(self.max_iter):
             # Update step size (alpha)
@@ -68,6 +70,9 @@ class PopulationV1Adaptive:
             if fitness_values[min_fitness_idx] < best_fitness:
                 best_solution = new_population[min_fitness_idx]
                 best_fitness = fitness_values[min_fitness_idx]
+
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
             # Replace population
             population = new_population

@@ -2,7 +2,7 @@ import numpy as np
 from framework.utils import Function
 
 class CGA:
-    def __init__(self, func, bounds, population_size=50, pc=0.8, pm=0.1, max_nfe=1000):
+    def __init__(self, func:Function, bounds, population_size=50, pc=0.8, pm=0.1, max_nfe=1000):
         """
         Initialize the Canonical Genetic Algorithm (CGA).
 
@@ -20,6 +20,7 @@ class CGA:
         self.pm = pm
         self.max_nfe = max_nfe
         self.nfe = 0
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -100,6 +101,7 @@ class CGA:
 
         best_solution = population[np.argmin(fitness_values)]
         best_fitness = np.min(fitness_values)
+        self.best_fitness_history.append(best_fitness)
 
         while self.nfe < self.max_nfe:
             # Selection
@@ -123,6 +125,9 @@ class CGA:
             if new_fitness_values[min_fitness_idx] < best_fitness:
                 best_solution = new_population[min_fitness_idx]
                 best_fitness = new_fitness_values[min_fitness_idx]
+
+            # Track the best fitness at each iteration
+            self.best_fitness_history.append(best_fitness)
 
             # Replace population
             population = new_population
