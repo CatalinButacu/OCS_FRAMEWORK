@@ -69,6 +69,11 @@ class CGA:
         :param fitness_values: A numpy array of fitness values.
         :return: Selected parents (list of binary strings).
         """
+        
+        # Check for NaN or inf in fitness values
+        if np.any(np.isnan(fitness_values)) or np.any(np.isinf(fitness_values)):
+            fitness_values = np.where(np.isnan(fitness_values) | np.isinf(fitness_values), 1e10, fitness_values)
+
         # Shift fitness values to make them non-negative
         min_fitness = np.min(fitness_values)
         if min_fitness < 0:

@@ -49,6 +49,8 @@ def binarysolution2float(binary_sol, bounds):
         normalized_val = bin2float(bits)
         # Map normalized value to the original range [lower, upper]
         real_value = lower + normalized_val * (upper - lower)
+        # Clip the value to bounds
+        real_value = np.clip(real_value, lower, upper)
         solution_x.append(real_value)
     return solution_x
 
