@@ -1,27 +1,37 @@
-import struct
 import numpy as np
 
-def bin2float(binary_list):
+def float_to_binary(value, bits_per_gene=64):
     """
-    Convert a binary string (list of bits) to a float (64-bit representation).
+    Convert a float value to a binary string with a fixed number of bits.
+    :param value: Float value in the range [0, 1].
+    :param bits_per_gene: Number of bits to represent the value.
+    :return: Binary string.
     """
-    rez = ''.join(binary_list)
-    h = int(rez, 2).to_bytes(8, byteorder="big")
-    return struct.unpack('>d', h)[0]
+    # Scale the value to the range [0, 2^bits_per_gene - 1]
+    scaled_value = int(value * (2**bits_per_gene - 1))
+    # Convert to binary string
+    binary_string = format(scaled_value, f'0{bits_per_gene}b')
+    return binary_string
 
-def float2bin(float_val):
+def binary_to_float(binary_string, bits_per_gene=64):
     """
-    Convert a float to a binary string (64-bit representation).
+    Convert a binary string to a float value.
+    :param binary_string: Binary string.
+    :param bits_per_gene: Number of bits used to represent the value.
+    :return: Float value in the range [0, 1].
     """
-    [d] = struct.unpack(">Q", struct.pack(">d", float_val))
-    return list(f'{d:064b}')
+    # Convert binary string to integer
+    scaled_value = int(binary_string, 2)
+    # Scale back to the range [0, 1]
+    value = scaled_value / (2**bits_per_gene - 1)
+    return value
 
-def solution2binary(solution_x, bounds):
+def solution2binary(solution_x, bounds, bits_per_gene=64):
     """
     Convert a list of float values to a binary string.
-
     :param solution_x: List of float values.
     :param bounds: List of tuples [(min, max)] for each dimension.
+    :param bits_per_gene: Number of bits per gene.
     :return: Binary string.
     """
     binary_sol = []
@@ -29,24 +39,23 @@ def solution2binary(solution_x, bounds):
         # Normalize the value to [0, 1] range
         normalized_val = (val - lower) / (upper - lower)
         # Convert to binary representation
-        binary_val = float2bin(normalized_val)
-        binary_sol += binary_val
+        binary_val = float_to_binary(normalized_val, bits_per_gene)
+        binary_sol.append(binary_val)
     return ''.join(binary_sol)
 
-def binarysolution2float(binary_sol, bounds):
+def binarysolution2float(binary_sol, bounds, bits_per_gene=64):
     """
     Convert a binary string to a list of float values.
-
     :param binary_sol: Binary string.
     :param bounds: List of tuples [(min, max)] for each dimension.
+    :param bits_per_gene: Number of bits per gene.
     :return: List of float values.
     """
-    n = 64  # Number of bits per float value
     solution_x = []
-    bitss = [binary_sol[i:i+n] for i in range(0, len(binary_sol), n)]
+    bitss = [binary_sol[i:i+bits_per_gene] for i in range(0, len(binary_sol), bits_per_gene)]
     for bits, (lower, upper) in zip(bitss, bounds):
         # Convert binary to normalized float in [0, 1]
-        normalized_val = bin2float(bits)
+        normalized_val = binary_to_float(bits, bits_per_gene)
         # Map normalized value to the original range [lower, upper]
         real_value = lower + normalized_val * (upper - lower)
         # Clip the value to bounds
@@ -101,20 +110,3 @@ def binary_mutation(individual, mutation_rate):
         if np.random.rand() < mutation_rate:
             mutated_individual[i] = '1' if mutated_individual[i] == '0' else '0'
     return ''.join(mutated_individual)
-
-def int2binary(integer, num_bits):
-    """
-    Convert an integer to a binary string of fixed length.
-    :param integer: Integer value.
-    :param num_bits: Number of bits in the binary string.
-    :return: Binary string.
-    """
-    return format(integer, f'0{num_bits}b')
-
-def binary2int(binary_string):
-    """
-    Convert a binary string to an integer.
-    :param binary_string: Binary string.
-    :return: Integer value.
-    """
-    return int(binary_string, 2)

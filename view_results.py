@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-from config_test_run import benchmark_functions, dimensions, algorithms
+from config_test_run import benchmark_functions, dimensions, algorithms, algorithm_line_styles
 
 # Set the backend to 'Agg' to avoid Tcl/Tk issues
 matplotlib.use('Agg')
@@ -102,21 +102,21 @@ def compute_and_plot_ranks(data, measure):
     return avg_ranks
 
 # Compute and plot ranks based on mean fitness, min fitness, and std fitness
-compute_and_plot_ranks(summary_df, "Mean_Fitness")
-compute_and_plot_ranks(summary_df, "Min_Fitness")
-compute_and_plot_ranks(summary_df, "Std_Fitness")
+compute_and_plot_ranks(summary_df, "Average")  # Changed from "Mean_Fitness" to "Average"
+compute_and_plot_ranks(summary_df, "Best")     # Changed from "Min_Fitness" to "Best"
+compute_and_plot_ranks(summary_df, "Std")      # Changed from "Std_Fitness" to "Std"
 
 # --- Step 4: Display Best Algorithms ---
 # Determine the best algorithm for each function and dimension
-best_algorithms = summary_df.loc[summary_df.groupby(["Function", "Dimension"])["Mean_Fitness"].idxmin()]
+best_algorithms = summary_df.loc[summary_df.groupby(["Function", "Dimension"])["Average"].idxmin()]
 print("\nBest Algorithms for Each Function and Dimension:")
-print(best_algorithms[["Function", "Dimension", "Algorithm", "Mean_Fitness"]])
+print(best_algorithms[["Function", "Dimension", "Algorithm", "Average"]])
 
 # --- Step 5: Plot Best Performance Evolution for Each Formula ---
 def plot_best_performance_evolution_for_function(func_name):
     """
     Plot the evolution of the best fitness over time for each algorithm for a specific function.
-    Only the first 20 iterations are plotted for each dimension.
+    Only the first 100 iterations are plotted for each dimension.
     Save the plot in a structured folder.
     """
     for dimIdx, dim in enumerate(dimensions):  # Iterate over all dimensions
@@ -138,14 +138,14 @@ def plot_best_performance_evolution_for_function(func_name):
             best_run = convergence_df.iloc[-1].idxmin()
             best_fitness_history = convergence_df[best_run]
 
-            # Slice the best fitness history to only include the first 20 iterations
-            best_fitness_history = best_fitness_history[:20]
+            # Slice the best fitness history to only include the first 100 iterations
+            best_fitness_history = best_fitness_history[:100]
 
-            # Plot the best fitness history for the first 20 iterations
-            plt.plot(best_fitness_history, label=f"{algo_name}")
+            # Plot the best fitness history for the first 100 iterations with the corresponding line style
+            plt.plot(best_fitness_history, label=f"{algo_name}", linestyle=algorithm_line_styles.get(algo_name, "-"))
 
         # Add title, labels, and legend for the plot
-        plt.title(f"Best Fitness Evolution for {func_name} (Dimension {dim}, First 20 Iterations)")
+        plt.title(f"Best Fitness Evolution for {func_name} (Dimension {dim}, First 100 Iterations)")
         plt.xlabel("Iteration")
         plt.ylabel("Best Fitness")
         plt.legend()
@@ -163,7 +163,7 @@ def plot_best_performance_evolution_for_function(func_name):
 def plot_average_performance_evolution_for_function(func_name):
     """
     Plot the evolution of the average best fitness over time for each algorithm for a specific function.
-    Only the first 20 iterations are plotted for each dimension.
+    Only the first 100 iterations are plotted for each dimension.
     Save the plot in a structured folder.
     """
     for dimIdx, dim in enumerate(dimensions):  # Iterate over all dimensions
@@ -184,14 +184,14 @@ def plot_average_performance_evolution_for_function(func_name):
             # Compute the average best fitness across all runs
             avg_fitness_history = convergence_df.mean(axis=1)
 
-            # Slice the average fitness history to only include the first 20 iterations
-            avg_fitness_history = avg_fitness_history[:20]
+            # Slice the average fitness history to only include the first 100 iterations
+            avg_fitness_history = avg_fitness_history[:100]
 
-            # Plot the average fitness history for the first 20 iterations
-            plt.plot(avg_fitness_history, label=f"{algo_name}")
+            # Plot the average fitness history for the first 100 iterations with the corresponding line style
+            plt.plot(avg_fitness_history, label=f"{algo_name}", linestyle=algorithm_line_styles.get(algo_name, "-"))
 
         # Add title, labels, and legend for the plot
-        plt.title(f"Average Fitness Evolution for {func_name} (Dimension {dim}, First 20 Iterations)")
+        plt.title(f"Average Fitness Evolution for {func_name} (Dimension {dim}, First 100 Iterations)")
         plt.xlabel("Iteration")
         plt.ylabel("Average Best Fitness")
         plt.legend()
@@ -205,10 +205,10 @@ def plot_average_performance_evolution_for_function(func_name):
         plt.close()  # Close the plot to free up memory
         print(f"Saved average evolution plot: {plot_filename}")
 
-# Plot best performance evolution for each benchmark function (first 20 iterations)
+# Plot best performance evolution for each benchmark function (first 100 iterations)
 for func_name in benchmark_functions:
     plot_best_performance_evolution_for_function(func_name)
 
-# Plot average performance evolution for each benchmark function (first 20 iterations)
+# Plot average performance evolution for each benchmark function (first 100 iterations)
 for func_name in benchmark_functions:
     plot_average_performance_evolution_for_function(func_name)

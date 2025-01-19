@@ -8,30 +8,21 @@ class CGA:
     def __init__(self, func: Function, bounds, population_size=50, pc=0.8, pm=0.1, max_nfe=1000, bits_per_gene=64):
         """
         Initialize the Canonical Genetic Algorithm (CGA) with binary representation.
-
-        :param func: The objective function to minimize (an instance of `Function`).
-        :param bounds: A list of tuples [(min, max)] for each dimension.
-        :param population_size: The number of individuals in the population.
-        :param pc: Crossover probability.
-        :param pm: Mutation probability.
-        :param max_nfe: Maximum number of function evaluations (NFE).
         :param bits_per_gene: Number of bits used to represent each decision variable.
         """
+        self.bits_per_gene = bits_per_gene
         self.func = func
         self.bounds = bounds
         self.population_size = population_size
         self.pc = pc
         self.pm = pm
         self.max_nfe = max_nfe
-        self.bits_per_gene = bits_per_gene
         self.nfe = 0
         self.best_fitness_history = []
 
     def initialize_population(self):
         """
         Initialize the population with random binary individuals.
-
-        :return: A list of binary strings representing the population.
         """
         population = []
         for _ in range(self.population_size):
@@ -39,7 +30,7 @@ class CGA:
             for b in self.bounds:
                 # Generate random float within bounds and convert to binary
                 random_float = np.random.uniform(b[0], b[1])
-                binary_val = solution2binary([random_float], self.bounds)  # Pass bounds here
+                binary_val = solution2binary([random_float], [b], self.bits_per_gene)
                 individual.append(binary_val)
             population.append(''.join(individual))
         return population
@@ -47,14 +38,11 @@ class CGA:
     def evaluate_population(self, population):
         """
         Evaluate the fitness of the population.
-
-        :param population: A list of binary strings representing the population.
-        :return: A numpy array of fitness values.
         """
         fitness_values = []
         for individual in population:
             # Convert binary individual to real values
-            real_values = binarysolution2float(individual, self.bounds)  # Pass bounds here
+            real_values = binarysolution2float(individual, self.bounds, self.bits_per_gene)
             # Evaluate fitness
             fitness = self.func(real_values)
             fitness_values.append(fitness)
@@ -64,12 +52,7 @@ class CGA:
     def selection(self, population, fitness_values):
         """
         Select parents using roulette wheel selection.
-
-        :param population: A list of binary strings representing the population.
-        :param fitness_values: A numpy array of fitness values.
-        :return: Selected parents (list of binary strings).
         """
-        
         # Check for NaN or inf in fitness values
         if np.any(np.isnan(fitness_values)) or np.any(np.isinf(fitness_values)):
             fitness_values = np.where(np.isnan(fitness_values) | np.isinf(fitness_values), 1e10, fitness_values)
@@ -94,27 +77,18 @@ class CGA:
     def crossover(self, parent1, parent2):
         """
         Perform binary crossover (single-point by default).
-
-        :param parent1: First parent (binary string).
-        :param parent2: Second parent (binary string).
-        :return: Two offspring (binary strings).
         """
         return binary_crossover(parent1, parent2, crossover_type="single_point")
 
     def mutation(self, individual):
         """
         Perform binary mutation (bit-flip).
-
-        :param individual: A binary string representing an individual.
-        :return: Mutated binary string.
         """
         return binary_mutation(individual, self.pm)
 
     def optimize(self):
         """
         Run the Canonical Genetic Algorithm with binary representation.
-
-        :return: The best solution found and its fitness value.
         """
         # Initialize population
         population = self.initialize_population()
@@ -122,11 +96,11 @@ class CGA:
 
         # Track the best solution
         best_index = np.argmin(fitness_values)
-        best_solution = binarysolution2float(population[best_index], self.bounds)  # Pass bounds here
+        best_solution = binarysolution2float(population[best_index], self.bounds, self.bits_per_gene)
         best_fitness = fitness_values[best_index]
         self.best_fitness_history.append(best_fitness)
 
-        while self.nfe < self.max_nfe:
+        for _ in range(self.max_nfe):
             # Selection
             parents = self.selection(population, fitness_values)
 
@@ -145,7 +119,7 @@ class CGA:
             # Update best solution
             min_fitness_idx = np.argmin(new_fitness_values)
             if new_fitness_values[min_fitness_idx] < best_fitness:
-                best_solution = binarysolution2float(new_population[min_fitness_idx], self.bounds)  # Pass bounds here
+                best_solution = binarysolution2float(new_population[min_fitness_idx], self.bounds, self.bits_per_gene)
                 best_fitness = new_fitness_values[min_fitness_idx]
 
             # Track the best fitness at each iteration

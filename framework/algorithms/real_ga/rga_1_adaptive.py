@@ -117,7 +117,7 @@ class RGA1Adaptive:
         iteration = 0
         max_iter = self.max_nfe // self.population_size
 
-        while self.nfe < self.max_nfe:
+        for _ in range(self.max_nfe):
             # Adapt pc and pm based on iteration number
             self.pc = self.pc_initial * (1 - iteration / max_iter)
             self.pm = self.pm_initial * (iteration / max_iter)

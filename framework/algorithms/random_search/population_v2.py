@@ -46,12 +46,10 @@ class PopulationV2:
         for _ in range(self.max_iter):
             new_population = []
             for agent in population:
-                # Generate multiple new agents
-                for _ in range(self.population_size):
-                    direction = np.random.uniform(-1, 1, size=len(self.bounds))
-                    direction /= np.linalg.norm(direction)  # Normalize to unit vector
-
-                    # Generate a new agent
+                # Generate orthogonal directions for better exploration
+                for i in range(len(self.bounds)):
+                    direction = np.zeros(len(self.bounds))
+                    direction[i] = 1
                     new_agent = agent + self.alpha * direction
                     new_agent = np.clip(new_agent, [b[0] for b in self.bounds], [b[1] for b in self.bounds])
                     new_population.append(new_agent)
@@ -69,7 +67,7 @@ class PopulationV2:
             if fitness_values[min_fitness_idx] < best_fitness:
                 best_solution = new_population[min_fitness_idx]
                 best_fitness = fitness_values[min_fitness_idx]
-           
+
             # Track the best fitness at each iteration
             self.best_fitness_history.append(best_fitness)
 

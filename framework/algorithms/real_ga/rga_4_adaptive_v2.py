@@ -45,7 +45,7 @@ class RGA4AdaptiveV2(RGA4):
         best_fitness = np.min(fitness_values)
         self.best_fitness_history.append(best_fitness)
 
-        while self.nfe < self.max_nfe:
+        for _ in range(self.max_nfe):
             # Adapt pc and pm
             self.adapt_parameters(fitness_values)
 

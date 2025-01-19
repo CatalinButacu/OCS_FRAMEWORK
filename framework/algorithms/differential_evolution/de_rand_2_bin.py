@@ -89,7 +89,7 @@ class DERand2Bin:
         best_fitness = np.min(fitness_values)
         self.best_fitness_history.append(best_fitness)
 
-        while self.nfe < self.max_nfe:
+        for _ in range(self.max_nfe):
             new_population = []
             for i in range(self.population_size):
                 # Mutation

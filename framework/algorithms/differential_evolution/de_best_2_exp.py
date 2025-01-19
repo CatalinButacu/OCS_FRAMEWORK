@@ -95,7 +95,7 @@ class DEBest2Exp:
         best_fitness = fitness_values[best_idx]
         self.best_fitness_history.append(best_fitness)
 
-        while self.nfe < self.max_nfe:
+        for _ in range(self.max_nfe):
             new_population = []
             for i in range(self.population_size):
                 # Mutation

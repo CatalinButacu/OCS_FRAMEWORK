@@ -78,12 +78,23 @@ from framework.algorithms.canonical_ga import CGA, CGAAdaptiveV2, CGAGreedy
 
 ```
 TUIASI_OCS_TEAM11_2025/
+├── examples/                # Example scripts sample of using library
+│   └── example_canonical_ga.py
 ├── framework/               # Core framework code
 │   ├── algorithms/          # Optimization algorithms
-│   ├── utils/               # Utility functions
-│   └── __init__.py          # Package initialization
-├── examples/                # Example scripts
-│   └── example_canonical_ga.py
+│   │   ├── random_search/             # Stochastic Optimization Algorithm
+│   │   ├── canonical_ga/              # Classic Genetic Algorithm
+│   │   ├── real_ga/                   # Real-Valued Genetic Algorithm
+│   │   └── differential_evolution/    # Differential Evolution Algorithm
+│   ├── benchmarks/          # Definition of benchmark functions  
+│   └── utils/               # Utility functions
+├── [results](https://drive.google.com/drive/folders/1jUsQWJ9Azn6kFF2dqu41ntUk4YKcYyNc)/                 # Benchmark results
+│   ├── csv/                 # CSV data
+│   └── images/              # Visualizations
+├── test/                    # Test integrity of framework components
+├── config_test_run.py       # Change configuration of running test
+├── run_benchmark.py         # Run benchmarks
+├── view_results.py          # Generate visualizations
 ├── requirements.txt         # Project dependencies
 ├── setup.py                 # Package installation script
 └── README.md                # This file

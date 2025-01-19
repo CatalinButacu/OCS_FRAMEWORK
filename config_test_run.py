@@ -113,3 +113,20 @@ algorithm_parameters = {
         "max_nfe": max_nfe,
     },
 }
+
+# Define line styles for each algorithm
+algorithm_line_styles = {
+    "RandomSearch": ":",          # Dotted line
+    "CGA": "--",                  # Dashed line
+    "CGAAdaptiveV2": "--",        # Dashed line
+    "CGAGreedy": "--",            # Dashed line
+    "RGA1Adaptive": "-.",         # Dash-dot line
+    "RGA4": "-.",                 # Dash-dot line
+    "RGA4AdaptiveV2": "-.",       # Dash-dot line
+    "PopulationV1Adaptive": "-",  # Solid line (default)
+    "PopulationV2": "-",          # Solid line (default)
+    "PopulationV3SelfAdaptive": "-",  # Solid line (default)
+    "DERand2Bin": "-",            # Solid line (default)
+    "DEBest1Exp": "-",            # Solid line (default)
+    "DEBest2Exp": "-",            # Solid line (default)
+}

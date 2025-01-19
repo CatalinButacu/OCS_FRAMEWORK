@@ -47,7 +47,13 @@ for func_name, func in benchmark_functions.items():
                 })
 
                 # Save convergence data for this run
-                convergence_data.append(algorithm.best_fitness_history)
+                if hasattr(algorithm, 'best_fitness_history'):
+                    # Ensure best_fitness_history only contains the best fitness value per iteration
+                    convergence_data.append(algorithm.best_fitness_history)
+                else:
+                    # If the algorithm doesn't have best_fitness_history, create it manually
+                    print(f"[WARNING] {algo_name} doesnt have best_fitness_history...")
+                    convergence_data.append([best_fitness])  # Only save the final best fitness
 
             # Save convergence data to a CSV file
             convergence_df = pd.DataFrame(convergence_data).T  # Transpose to have iterations as rows

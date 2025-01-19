@@ -2,7 +2,7 @@ import numpy as np
 from framework.utils import Function
 
 class PopulationV3SelfAdaptive:
-    def __init__(self, func:Function, bounds, population_size=10, max_iter=1000, alpha_initial=1.0, alpha_change_rate=0.01):
+    def __init__(self, func: Function, bounds, population_size=10, max_iter=1000, alpha_initial=1.0, alpha_change_rate=0.005):
         """
         Initialize the PopulationV3SelfAdaptive algorithm.
 
@@ -19,7 +19,7 @@ class PopulationV3SelfAdaptive:
         self.max_iter = max_iter
         self.alpha_initial = alpha_initial
         self.alpha_change_rate = alpha_change_rate
-        self.best_fitness_history = [] 
+        self.best_fitness_history = []
 
     def initialize_population(self):
         """
@@ -32,7 +32,7 @@ class PopulationV3SelfAdaptive:
             individual = [np.random.uniform(b[0], b[1]) for b in self.bounds]
             population.append(individual)
         return np.array(population)
-    
+
     def optimize(self):
         """
         Run the PopulationV3SelfAdaptive algorithm.
@@ -41,9 +41,19 @@ class PopulationV3SelfAdaptive:
         """
         # Initialize population
         population = self.initialize_population()
-        best_solution = None
-        best_fitness = float('inf')
+        
+        # Evaluate the initial population
+        fitness_values = np.array([self.func(agent) for agent in population])
+        
+        # Initialize best_solution and best_fitness
+        min_fitness_idx = np.argmin(fitness_values)
+        best_solution = population[min_fitness_idx]
+        best_fitness = fitness_values[min_fitness_idx]
+        
+        # Track the best fitness at each iteration
         self.best_fitness_history.append(best_fitness)
+        
+        # Initialize alpha
         alpha = self.alpha_initial
 
         for _ in range(self.max_iter):
@@ -62,19 +72,20 @@ class PopulationV3SelfAdaptive:
             new_population = np.array(new_population)
             fitness_values = np.array([self.func(agent) for agent in new_population])
 
-            # Compute fitness variance
-            fitness_variance = np.var(fitness_values)
-            normalized_variance = fitness_variance / np.max(fitness_values)  # Normalize variance
+            # Compute fitness improvement ratio
+            current_best_fitness = np.min(fitness_values)
+            improvement_ratio = (best_fitness - current_best_fitness) / (best_fitness + 1e-10)
 
-            # Update alpha based on fitness variance
-            if normalized_variance > 0.5:
-                # High variance: decrease alpha slowly (or increase slightly)
-                alpha *= (1 + self.alpha_change_rate * (1 - normalized_variance))
+            # Update alpha based on improvement ratio
+            if improvement_ratio > 0:
+                # If there is improvement, increase alpha slightly
+                alpha *= (1 + self.alpha_change_rate)
             else:
-                # Low variance: decrease alpha more aggressively
-                alpha *= (1 - self.alpha_change_rate * (1 - normalized_variance))
+                # If no improvement, decrease alpha more aggressively
+                alpha *= (1 - self.alpha_change_rate)
 
-            print(f"fitness_values:{fitness_values}; best_fitness:{best_fitness}; alpha:{alpha}")
+            # Ensure alpha stays within reasonable bounds
+            alpha = np.clip(alpha, 1e-5, 1.0)
 
             # Select the best agents
             best_indices = np.argsort(fitness_values)[:self.population_size]
@@ -88,6 +99,5 @@ class PopulationV3SelfAdaptive:
 
             # Track the best fitness at each iteration
             self.best_fitness_history.append(best_fitness)
-
 
         return best_solution, best_fitness

@@ -118,7 +118,7 @@ class RGA4:
         best_fitness = np.min(fitness_values)
         self.best_fitness_history.append(best_fitness)
 
-        while self.nfe < self.max_nfe:
+        for _ in range(self.max_nfe):
             # Selection
             parents = self.selection(population, fitness_values)
 

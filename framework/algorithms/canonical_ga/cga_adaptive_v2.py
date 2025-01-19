@@ -1,9 +1,7 @@
 import numpy as np
 from .cga import CGA
 from framework.utils import Function
-from framework.utils.binary_manipulation import (
-    solution2binary, binarysolution2float, binary_crossover, binary_mutation
-)
+from framework.utils.binary_manipulation import binarysolution2float
 
 class CGAAdaptiveV2(CGA):
     def __init__(self, func: Function, bounds, population_size=50, pc_initial=0.8, pm_initial=0.1, max_nfe=1000, bits_per_gene=64):
@@ -51,7 +49,7 @@ class CGAAdaptiveV2(CGA):
         best_fitness = fitness_values[best_index]
         self.best_fitness_history.append(best_fitness)
 
-        while self.nfe < self.max_nfe:
+        for iter in range(self.max_nfe):
             # Adapt pc and pm
             self.adapt_parameters(fitness_values)
 
